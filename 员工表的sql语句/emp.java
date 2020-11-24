@@ -4,11 +4,6 @@
 
 作业内容
 
-
-
-
-
-
 drop table emp;
 
 create table emp(
@@ -41,7 +36,6 @@ select depart,sum(salary) sum_salary
 from emp
 group by depart;
 
-
 3、查询总薪水排名第二的部门
 select depart,sum(salary) sum_salary
 from emp
@@ -64,9 +58,62 @@ select *
 from emp 
 group by name 
 having count(name)>1; -- 但是这个虽然可以筛选出来还是会把后面的信息合并
+--并且显示的是第一条数据
 
 所以使用自联结查询
 
 
+--解决方案：
+
+第一种使用子查询是指嵌入在其他sql 语句的select语句 
+-- 1.where 条件 然后使用(not)in 关键字  加上子查询语句
+-- 2.子查询语句出现在from  中，相当于把一个子查询当作一个临时表
+select * 
+from emp
+where  name in (
+select name
+from emp 
+group by name
+having count(name) >1
+);
+
+第二种使用自联结查询
+
+select emp1.name ,emp1.depart ,emp1.id ,emp1.salary 
+from emp emp1 ,emp emp2
+where emp1.name = emp2.name
+and emp1.id != emp2.id;
+
+
+
 5、查询各部门薪水大于10000的男性员工的平均薪水
 
+select depart ,avg(salary) avg_salary
+from emp
+where salary > 10000 and sex = 0
+group by depart;
+
+-- 能不能使用having by 语句 
+不能因为分组之后就不再显示性别信息了
+select depart ,avg(salary) avg_salary
+from emp
+group by depart; 我的havingBy 语句是对 已经group by 语句的信息进行再次过滤
+-- 也就是说 having 子句被限制在已经在SELECT语句中定义的列和聚合表达式上
+
+
+select * from emp where salary > 10000 ;
+
+
+-- 其他为了能够执行sql 语句改动过的一些sql
+
+-- update 表名 set 列名 where 
+update emp set salary = 11000 where name = 'gf' and depart = '行政部门';
+insert into emp values(10,'dfg',1,'行政部门',11008);
+insert into emp values(11,'tyu',1,'行政部门',10040);
+insert into emp values(12,'dfg',0,'行政部门',11008);
+insert into emp values(13,'tyu',0,'行政部门',10040);
+
+
+select name,avg(salary) avg_salary 
+from emp
+group by sex; -- 好像不是不能用，而是看到的信息没有意义
